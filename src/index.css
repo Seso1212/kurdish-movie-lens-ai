@@ -60,10 +60,20 @@
   }
   
   .professional-card {
-    @apply transition-all duration-300 backface-visible transform-gpu hover:translate-y-[-3px] hover:scale-[1.005];
+    @apply transition-all duration-300 transform-gpu hover:translate-y-[-3px] hover:scale-[1.005];
   }
   
   .gradient-mask {
     @apply [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_75%,rgba(0,0,0,0))] [-webkit-mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_75%,rgba(0,0,0,0))];
+  }
+}
+
+@layer utilities {
+  .backface-visible {
+    backface-visibility: visible;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
   }
 }
