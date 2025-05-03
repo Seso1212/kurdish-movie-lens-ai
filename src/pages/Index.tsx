@@ -14,6 +14,14 @@ import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import DualResultsSection from '@/components/DualResultsSection';
 
+// Common movie keywords for better search
+const COMMON_MOVIE_KEYWORDS: Record<string, string[]> = {
+  "big hero 6": ["baymax", "robot", "healthcare", "disney", "animated", "san fransokyo", "hiro"],
+  "the dark knight": ["batman", "joker", "gotham", "nolan", "heath ledger"],
+  "spirited away": ["ghibli", "chihiro", "no face", "bathhouse", "miyazaki"],
+  // Add more movies as needed
+};
+
 const Index = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -29,6 +37,22 @@ const Index = () => {
     refetchOnWindowFocus: false
   });
 
+  const enhanceSearchQuery = (query: string): string => {
+    const loweredQuery = query.toLowerCase();
+    
+    // Check if the query matches any of our predefined movie keywords
+    for (const [movieTitle, keywords] of Object.entries(COMMON_MOVIE_KEYWORDS)) {
+      // If the query contains multiple keywords for a specific movie, enhance with the movie title
+      const matchedKeywords = keywords.filter(keyword => loweredQuery.includes(keyword.toLowerCase()));
+      if (matchedKeywords.length >= 2) {
+        console.log(`Enhanced search query with: ${movieTitle}`);
+        return movieTitle;
+      }
+    }
+    
+    return query;
+  };
+
   const handleSearch = async (query: string) => {
     if (query.trim() === '') {
       toast({
@@ -42,28 +66,37 @@ const Index = () => {
     setIsSearching(true);
     setHasSearched(false);
     setSearchQuery(query);
+    setImdbMovie(null);
+    setKurdishMovie(null);
     
     try {
-      // In a real app, this would be a call to an AI/ML service
-      // For now, we'll search IMDB directly with the user's query and take the first result
+      const enhancedQuery = enhanceSearchQuery(query);
+      console.log(`Original query: "${query}"`);
+      console.log(`Enhanced query: "${enhancedQuery}"`);
       
-      // Find IMDB match first
-      const imdbResults = await searchIMDBMovies(query);
+      // Find IMDB match using the enhanced query
+      const imdbResults = await searchIMDBMovies(enhancedQuery);
       const bestImdbMatch = imdbResults.length > 0 ? imdbResults[0] : null;
-      setImdbMovie(bestImdbMatch);
       
-      // If we have an IMDB match, check if we have Kurdish subtitles for it
-      let kurdishMatch = null;
+      // Log the results
+      console.log('IMDB Match:', bestImdbMatch);
+      
       if (bestImdbMatch) {
-        kurdishMatch = findKurdishSubtitleByTitle(bestImdbMatch.l);
+        setImdbMovie(bestImdbMatch);
+        
+        // If we have an IMDB match, check if we have Kurdish subtitles for it
+        const kurdishMatch = findKurdishSubtitleByTitle(bestImdbMatch.l);
+        setKurdishMovie(kurdishMatch);
+        
+        console.log('Kurdish Match:', kurdishMatch);
+      } else {
+        // If no IMDB match, try searching directly with the original query in the Kurdish database
+        const directKurdishMatch = findKurdishSubtitleByTitle(query);
+        setKurdishMovie(directKurdishMatch);
+        console.log('Direct Kurdish Match:', directKurdishMatch);
       }
       
-      setKurdishMovie(kurdishMatch);
       setHasSearched(true);
-      
-      // Log the results for debugging
-      console.log('IMDB Match:', bestImdbMatch);
-      console.log('Kurdish Match:', kurdishMatch);
     } catch (error) {
       console.error("Search error:", error);
       toast({

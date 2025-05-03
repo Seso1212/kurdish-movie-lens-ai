@@ -48,7 +48,7 @@ const SearchSection = ({ onSearch, isSearching }: SearchSectionProps) => {
                 id="movieQuery" 
                 rows={4} 
                 className="w-full bg-dark-300/70 border border-dark-100 rounded-lg px-5 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/30 resize-none glow-border transition-all duration-200"
-                placeholder="Describe any movie with details (e.g. 'Animated Disney movie about robots from 2014 where the main character builds healthcare robot'). Be as specific as possible for better results..."
+                placeholder="Describe any movie with details (e.g. 'Animated Disney movie with a big healthcare robot called Baymax' or 'Batman movie with the Joker by Christopher Nolan')"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -56,7 +56,7 @@ const SearchSection = ({ onSearch, isSearching }: SearchSectionProps) => {
               ></textarea>
               <div className="absolute bottom-4 right-4 text-xs text-blue-400/50">
                 <i className="fas fa-lightbulb mr-1"></i>
-                <span>Pro Tip: Include year, director, or specific details</span>
+                <span>Pro Tip: Include character names and unique details</span>
               </div>
             </div>
           </div>

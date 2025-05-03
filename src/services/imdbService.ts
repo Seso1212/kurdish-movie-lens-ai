@@ -7,6 +7,8 @@ export async function searchIMDBMovies(query: string): Promise<IMDBMovie[]> {
     const cleanQuery = query.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
     const encodedQuery = encodeURIComponent(cleanQuery);
     
+    console.log(`Searching IMDB for: ${cleanQuery}`);
+    
     const response = await fetch(`https://imdb-movies-web-series-etc-search.p.rapidapi.com/${encodedQuery}.json`, {
       method: 'GET',
       headers: {
@@ -16,15 +18,26 @@ export async function searchIMDBMovies(query: string): Promise<IMDBMovie[]> {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to fetch from IMDB API');
+      throw new Error(`Failed to fetch from IMDB API: ${response.statusText}`);
     }
     
     const data = await response.json();
     
+    console.log('IMDB API response:', data);
+    
     if (Array.isArray(data) && data.length > 0) {
-      return data;
+      return data.map(item => ({
+        id: item.id || '',
+        l: item.l || 'Unknown Title',
+        y: item.y || 0,
+        s: item.s || '',
+        q: item.q || '',
+        rank: item.rank || 0,
+        imageUrl: item.i?.imageUrl || ''
+      }));
     }
     
+    console.log('No results found in IMDB API response');
     return [];
   } catch (error) {
     console.error('Error fetching IMDB data:', error);
