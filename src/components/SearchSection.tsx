@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { Search } from 'lucide-react';
 
 interface SearchSectionProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string) => Promise<void>;
+  isSearching: boolean;
 }
 
-const SearchSection = ({ onSearch }: SearchSectionProps) => {
+const SearchSection = ({ onSearch, isSearching }: SearchSectionProps) => {
   const [query, setQuery] = useState('');
 
   const handleSearch = () => {
@@ -50,6 +52,7 @@ const SearchSection = ({ onSearch }: SearchSectionProps) => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
+                disabled={isSearching}
               ></textarea>
               <div className="absolute bottom-4 right-4 text-xs text-blue-400/50">
                 <i className="fas fa-lightbulb mr-1"></i>
@@ -59,11 +62,21 @@ const SearchSection = ({ onSearch }: SearchSectionProps) => {
           </div>
           <button 
             onClick={handleSearch}
-            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
+            disabled={isSearching}
+            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/20 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
           >
-            <i className="fas fa-search mr-1"></i>
-            <span>Analyze Movie</span>
-            <i className="fas fa-arrow-right ml-1 text-sm"></i>
+            {isSearching ? (
+              <>
+                <div className="h-5 w-5 rounded-full border-2 border-t-transparent border-white animate-spin mr-1"></div>
+                <span>Searching...</span>
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4 mr-1" />
+                <span>Analyze Movie</span>
+                <i className="fas fa-arrow-right ml-1 text-sm"></i>
+              </>
+            )}
           </button>
         </div>
         

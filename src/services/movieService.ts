@@ -1,5 +1,5 @@
-
-import { Movie, KurdishSubtitle } from '@/types';
+import { Movie, KurdishSubtitle, IMDBMovie } from '@/types';
+import { toast } from "@/hooks/use-toast";
 
 // Enhanced movie database with more details
 export const movieDatabase: Movie[] = [
@@ -61,35 +61,37 @@ export const movieDatabase: Movie[] = [
   }
 ];
 
-// Kurdish subtitle database
-export const kurdishSubtitleMovies: KurdishSubtitle[] = [
-  {
-    "Title": "Big Hero 6",
-    "Year": "2014",
-    "Genre": "ئەنیمەیشن",
-    "Movie URL": "https://kurdsubtitle.net/movies/370945-Big-Hero-6",
-    "Language": "English, Kurdish",
-    "Poster URL": "https://images.kurdsubtitle.net/file/kurdsubtitle/605115f98b9f2fb44bb47236_hightQuality.webp",
-    "Upload Date": "2021-03-08",
-    "Quality": "1080p",
-    "Subtitle Type": "SRT",
-    "Size": "1.4GB"
-  },
-  {
-    "Title": "Pakeezah",
-    "Year": "1972",
-    "Genre": "میوزیكاڵ",
-    "Movie URL": "https://kurdsubtitle.net/movies/12293-Pakeezah",
-    "Language": "Hindi, Kurdish",
-    "Poster URL": "https://images.kurdsubtitle.net/file/kurdsubtitle/604fcb44ab8f5c87b415a3d6_hightQuality.webp",
-    "Upload Date": "2021-03-11",
-    "Quality": "720p",
-    "Subtitle Type": "ASS",
-    "Size": "850MB"
-  }
-];
+// We'll replace this with the dynamic loading of data from the JSON files
+export const kurdishSubtitleMovies: KurdishSubtitle[] = [];
 
-// Enhanced matching algorithm
+// Function to load Kurdish subtitle data
+export async function loadKurdishSubtitles(): Promise<KurdishSubtitle[]> {
+  try {
+    const response = await fetch('https://raw.githubusercontent.com/Seso1212/l_test/main/movie_pages.zip');
+    if (!response.ok) {
+      throw new Error('Failed to fetch movie data');
+    }
+    
+    // For now we'll return empty array as we need proper handling for the ZIP file
+    // In a real app, you'd need to extract the ZIP and parse the JSON
+    toast({
+      title: "Info",
+      description: "Kurdish subtitle data would be loaded from the ZIP file in a production environment",
+    });
+    
+    return kurdishSubtitleMovies;
+  } catch (error) {
+    console.error('Error loading Kurdish subtitles:', error);
+    toast({
+      title: "Error",
+      description: "Failed to load Kurdish subtitle data",
+      variant: "destructive"
+    });
+    return [];
+  }
+}
+
+// Enhanced matching algorithm for movie recommendations based on user description
 export function findMatchingMovies(query: string): Movie[] {
   // Pre-process query: remove stopwords, tokenize, stem
   const cleanedQuery = query.toLowerCase()
@@ -175,4 +177,26 @@ export function hasKurdishSubtitle(movieTitle: string): KurdishSubtitle | undefi
   return kurdishSubtitleMovies.find(m => 
     m.Title.toLowerCase() === movieTitle.toLowerCase()
   );
+}
+
+// Simulate finding a Kurdish movie based on user description (this would be replaced by AI/ML in production)
+export function findKurdishSubtitleByDescription(description: string): KurdishSubtitle | null {
+  // Simple keyword matching for demo purposes
+  const keywords = description.toLowerCase().split(/\s+/);
+  
+  for (const movie of kurdishSubtitleMovies) {
+    const title = movie.Title.toLowerCase();
+    const genre = movie.Genre.toLowerCase();
+    const year = movie.Year.toLowerCase();
+    
+    // Check if any keywords match with title, genre, or year
+    if (keywords.some(keyword => 
+        title.includes(keyword) || 
+        genre.includes(keyword) || 
+        year.includes(keyword))) {
+      return movie;
+    }
+  }
+  
+  return null;
 }

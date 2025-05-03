@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
-import { Movie } from '@/types';
-import { findMatchingMovies, kurdishSubtitleMovies, hasKurdishSubtitle } from '@/services/movieService';
+import React, { useState, useEffect } from 'react';
+import { KurdishSubtitle, IMDBMovie } from '@/types';
+import { loadKurdishSubtitles, findKurdishSubtitleByDescription } from '@/services/movieService';
+import { searchIMDBMovies } from '@/services/imdbService';
 import { Toaster } from "@/components/ui/toaster";
 
 // Components
@@ -9,48 +10,49 @@ import Header from '@/components/Header';
 import SearchSection from '@/components/SearchSection';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
-import ResultsSection from '@/components/ResultsSection';
+import DualResultsSection from '@/components/DualResultsSection';
 
 const Index = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [results, setResults] = useState<Movie[]>([]);
-  const [stats, setStats] = useState({
-    matchRate: 0,
-    kurdishRate: 0,
-    avgConfidence: 0
-  });
+  const [kurdishMovie, setKurdishMovie] = useState<KurdishSubtitle | null>(null);
+  const [imdbMovie, setImdbMovie] = useState<IMDBMovie | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSearch = (query: string) => {
+  // Load Kurdish subtitles data on component mount
+  useEffect(() => {
+    const initData = async () => {
+      await loadKurdishSubtitles();
+      setIsLoading(false);
+    };
+    
+    initData();
+  }, []);
+
+  const handleSearch = async (query: string) => {
     setIsSearching(true);
     setHasSearched(false);
     
-    // Simulate AI processing with a delay
-    setTimeout(() => {
-      // Find matching movies
-      const movieResults = findMatchingMovies(query);
-      setResults(movieResults);
+    try {
+      // Find Kurdish subtitle match
+      const kurdishMatch = findKurdishSubtitleByDescription(query);
+      setKurdishMovie(kurdishMatch);
       
-      // Calculate statistics
-      const totalResults = movieResults.length;
-      const kurdishResults = movieResults.filter(movie => hasKurdishSubtitle(movie.title)).length;
+      // Find IMDB match
+      const imdbResults = await searchIMDBMovies(query);
+      setImdbMovie(imdbResults.length > 0 ? imdbResults[0] : null);
       
-      // Calculate match percentages
-      const matchRate = totalResults > 0 ? Math.round((totalResults / 4) * 100) : 0;
-      const kurdishRate = totalResults > 0 ? Math.round((kurdishResults / totalResults) * 100) : 0;
-      const avgConfidence = totalResults > 0 ? 
-        Math.round(movieResults.reduce((sum, movie) => sum + (movie.score / 10 * 100), 0) / totalResults) : 0;
-      
-      setStats({
-        matchRate,
-        kurdishRate,
-        avgConfidence
-      });
-      
-      setIsSearching(false);
       setHasSearched(true);
-    }, 2000);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
+    }
   };
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -61,19 +63,16 @@ const Index = () => {
       />
       
       <Header />
-      <SearchSection onSearch={handleSearch} />
+      <SearchSection onSearch={handleSearch} isSearching={isSearching} />
       
       {isSearching && <LoadingState />}
       
       {!isSearching && !hasSearched && <EmptyState />}
       
       {!isSearching && hasSearched && (
-        <ResultsSection 
-          movies={results}
-          kurdishSubtitleMovies={kurdishSubtitleMovies}
-          totalResults={results.length}
-          kurdishResults={results.filter(movie => hasKurdishSubtitle(movie.title)).length}
-          stats={stats}
+        <DualResultsSection 
+          kurdishMovie={kurdishMovie}
+          imdbMovie={imdbMovie}
         />
       )}
     </div>

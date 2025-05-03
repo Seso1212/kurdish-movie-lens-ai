@@ -22,7 +22,14 @@ export interface KurdishSubtitle {
   "Language": string;
   "Poster URL": string;
   "Upload Date": string;
-  "Quality": string;
-  "Subtitle Type": string;
-  "Size": string;
+}
+
+export interface IMDBMovie {
+  id: string;
+  l: string; // title
+  y: number; // year
+  s: string; // actors
+  q?: string; // type (e.g. "feature")
+  rank?: number;
+  imageUrl: string;
 }
