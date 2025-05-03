@@ -1,5 +1,7 @@
+
 import { Movie, KurdishSubtitle, IMDBMovie } from '@/types';
 import { toast } from "@/hooks/use-toast";
+import JSZip from 'jszip';
 
 // Enhanced movie database with more details
 export const movieDatabase: Movie[] = [
@@ -61,25 +63,53 @@ export const movieDatabase: Movie[] = [
   }
 ];
 
-// We'll replace this with the dynamic loading of data from the JSON files
-export const kurdishSubtitleMovies: KurdishSubtitle[] = [];
+// We'll store the Kurdish subtitle movies here once loaded
+let kurdishSubtitleMovies: KurdishSubtitle[] = [];
 
-// Function to load Kurdish subtitle data
+// Function to load Kurdish subtitle data from the ZIP file
 export async function loadKurdishSubtitles(): Promise<KurdishSubtitle[]> {
   try {
+    if (kurdishSubtitleMovies.length > 0) {
+      return kurdishSubtitleMovies; // Return cached data if already loaded
+    }
+
     const response = await fetch('https://raw.githubusercontent.com/Seso1212/l_test/main/movie_pages.zip');
     if (!response.ok) {
       throw new Error('Failed to fetch movie data');
     }
     
-    // For now we'll return empty array as we need proper handling for the ZIP file
-    // In a real app, you'd need to extract the ZIP and parse the JSON
+    const zipBlob = await response.blob();
+    const zip = new JSZip();
+    const zipContent = await zip.loadAsync(zipBlob);
+    
+    const allMovies: KurdishSubtitle[] = [];
+    
+    // Process all JSON files in the ZIP
+    const filePromises = Object.keys(zipContent.files)
+      .filter(filename => filename.endsWith('.json'))
+      .map(async (filename) => {
+        const fileData = await zipContent.files[filename].async('text');
+        try {
+          const jsonData = JSON.parse(fileData);
+          if (Array.isArray(jsonData)) {
+            allMovies.push(...jsonData);
+          }
+        } catch (parseError) {
+          console.error(`Failed to parse ${filename}:`, parseError);
+        }
+      });
+    
+    await Promise.all(filePromises);
+    
+    console.log(`Loaded ${allMovies.length} Kurdish subtitle movies`);
+    kurdishSubtitleMovies = allMovies;
+    
     toast({
-      title: "Info",
-      description: "Kurdish subtitle data would be loaded from the ZIP file in a production environment",
+      title: "Data Loaded",
+      description: `Successfully loaded ${allMovies.length} Kurdish subtitles`,
     });
     
-    return kurdishSubtitleMovies;
+    return allMovies;
   } catch (error) {
     console.error('Error loading Kurdish subtitles:', error);
     toast({
@@ -177,6 +207,27 @@ export function hasKurdishSubtitle(movieTitle: string): KurdishSubtitle | undefi
   return kurdishSubtitleMovies.find(m => 
     m.Title.toLowerCase() === movieTitle.toLowerCase()
   );
+}
+
+// Find a Kurdish movie based on title suggested by AI
+export function findKurdishSubtitleByTitle(title: string): KurdishSubtitle | null {
+  // Direct title match
+  const directMatch = kurdishSubtitleMovies.find(m => 
+    m.Title.toLowerCase() === title.toLowerCase()
+  );
+  
+  if (directMatch) {
+    return directMatch;
+  }
+  
+  // Fuzzy matching - check if the Kurdish subtitle title contains the search title
+  // or vice versa
+  const fuzzyMatch = kurdishSubtitleMovies.find(m => 
+    m.Title.toLowerCase().includes(title.toLowerCase()) || 
+    title.toLowerCase().includes(m.Title.toLowerCase())
+  );
+  
+  return fuzzyMatch || null;
 }
 
 // Simulate finding a Kurdish movie based on user description (this would be replaced by AI/ML in production)

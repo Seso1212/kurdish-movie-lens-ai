@@ -3,7 +3,10 @@ import { IMDBMovie } from "@/types";
 
 export async function searchIMDBMovies(query: string): Promise<IMDBMovie[]> {
   try {
-    const encodedQuery = encodeURIComponent(query);
+    // Clean the query for the API path - remove spaces and special chars
+    const cleanQuery = query.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+    const encodedQuery = encodeURIComponent(cleanQuery);
+    
     const response = await fetch(`https://imdb-movies-web-series-etc-search.p.rapidapi.com/${encodedQuery}.json`, {
       method: 'GET',
       headers: {
@@ -17,7 +20,12 @@ export async function searchIMDBMovies(query: string): Promise<IMDBMovie[]> {
     }
     
     const data = await response.json();
-    return data || [];
+    
+    if (Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+    
+    return [];
   } catch (error) {
     console.error('Error fetching IMDB data:', error);
     return [];
