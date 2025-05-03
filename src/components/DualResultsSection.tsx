@@ -7,9 +7,10 @@ import IMDBMovieCard from './IMDBMovieCard';
 interface DualResultsSectionProps {
   kurdishMovie: KurdishSubtitle | null;
   imdbMovie: IMDBMovie | null;
+  aiSuggestion?: string;
 }
 
-const DualResultsSection = ({ kurdishMovie, imdbMovie }: DualResultsSectionProps) => {
+const DualResultsSection = ({ kurdishMovie, imdbMovie, aiSuggestion }: DualResultsSectionProps) => {
   return (
     <section className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -25,6 +26,15 @@ const DualResultsSection = ({ kurdishMovie, imdbMovie }: DualResultsSectionProps
             </p>
           </div>
         </div>
+        {aiSuggestion && (
+          <div className="flex items-center gap-2 bg-dark-200 border border-dark-100 rounded-full px-4 py-2 shadow-sm">
+            <div className="relative">
+              <div className="h-2 w-2 rounded-full bg-blue-400"></div>
+              <div className="h-2 w-2 rounded-full bg-blue-400 absolute top-0 left-0 animate-ping"></div>
+            </div>
+            <span className="text-sm font-medium text-blue-300">AI suggested: {aiSuggestion}</span>
+          </div>
+        )}
         {kurdishMovie && (
           <div className="flex items-center gap-2 bg-dark-200 border border-dark-100 rounded-full px-4 py-2 shadow-sm">
             <div className="relative">
@@ -82,7 +92,7 @@ const DualResultsSection = ({ kurdishMovie, imdbMovie }: DualResultsSectionProps
               </div>
               <h3 className="text-xl font-bold text-white mb-2">No IMDB Match</h3>
               <p className="text-blue-300/80 max-w-md mx-auto">
-                We couldn't find a matching movie on IMDB. Try refining your search.
+                We couldn't find a matching movie on IMDB based on AI suggestions.
               </p>
             </div>
           )}
