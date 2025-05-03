@@ -48,7 +48,7 @@ const SearchSection = ({ onSearch, isSearching }: SearchSectionProps) => {
                 id="movieQuery" 
                 rows={4} 
                 className="w-full bg-dark-300/70 border border-dark-100 rounded-lg px-5 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/30 resize-none glow-border transition-all duration-200"
-                placeholder="Describe any movie with details (e.g. 'Animated Disney movie with a big healthcare robot called Baymax' or 'Batman movie with the Joker by Christopher Nolan')"
+                placeholder="Describe any movie with details (e.g. 'An animated Disney movie about a robot named Baymax' or 'A mafia movie with Al Pacino directed by Coppola')"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -56,7 +56,7 @@ const SearchSection = ({ onSearch, isSearching }: SearchSectionProps) => {
               ></textarea>
               <div className="absolute bottom-4 right-4 text-xs text-blue-400/50">
                 <i className="fas fa-lightbulb mr-1"></i>
-                <span>Pro Tip: Include character names and unique details</span>
+                <span>Pro Tip: Include character names, directors, or unique details</span>
               </div>
             </div>
           </div>
@@ -73,7 +73,7 @@ const SearchSection = ({ onSearch, isSearching }: SearchSectionProps) => {
             ) : (
               <>
                 <Search className="w-4 h-4 mr-1" />
-                <span>Analyze Movie</span>
+                <span>Find Movie</span>
                 <i className="fas fa-arrow-right ml-1 text-sm"></i>
               </>
             )}
@@ -83,15 +83,15 @@ const SearchSection = ({ onSearch, isSearching }: SearchSectionProps) => {
         <div className="flex flex-wrap gap-2 text-xs">
           <div className="flex items-center justify-center bg-dark-300/50 text-blue-300 border border-dark-100 rounded-full px-3 py-1">
             <i className="fas fa-database mr-1.5 text-blue-400/80"></i>
-            <span>1,427 Kurdish subtitles indexed</span>
+            <span>Kurdish subtitles database</span>
+          </div>
+          <div className="flex items-center justify-center bg-dark-300/50 text-blue-300 border border-dark-100 rounded-full px-3 py-1">
+            <i className="fas fa-film mr-1.5 text-blue-400/80"></i>
+            <span>IMDB data</span>
           </div>
           <div className="flex items-center justify-center bg-dark-300/50 text-blue-300 border border-dark-100 rounded-full px-3 py-1">
             <i className="fas fa-bolt mr-1.5 text-blue-400/80"></i>
-            <span>AI-powered matching</span>
-          </div>
-          <div className="flex items-center justify-center bg-dark-300/50 text-blue-300 border border-dark-100 rounded-full px-3 py-1">
-            <i className="fas fa-clock mr-1.5 text-blue-400/80"></i>
-            <span>Real-time verification</span>
+            <span>AI-powered search</span>
           </div>
         </div>
       </div>

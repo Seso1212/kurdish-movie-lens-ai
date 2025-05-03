@@ -25,8 +25,9 @@ export async function searchIMDBMovies(query: string): Promise<IMDBMovie[]> {
     
     console.log('IMDB API response:', data);
     
-    if (Array.isArray(data) && data.length > 0) {
-      return data.map(item => ({
+    // Check if the data contains the 'd' array which has the actual movies
+    if (data && data.d && Array.isArray(data.d) && data.d.length > 0) {
+      return data.d.map((item: any) => ({
         id: item.id || '',
         l: item.l || 'Unknown Title',
         y: item.y || 0,

@@ -18,6 +18,7 @@ import DualResultsSection from '@/components/DualResultsSection';
 const COMMON_MOVIE_KEYWORDS: Record<string, string[]> = {
   "big hero 6": ["baymax", "robot", "healthcare", "disney", "animated", "san fransokyo", "hiro"],
   "the dark knight": ["batman", "joker", "gotham", "nolan", "heath ledger"],
+  "the godfather": ["mafia", "corleone", "coppola", "al pacino", "marlon brando", "sicily"],
   "spirited away": ["ghibli", "chihiro", "no face", "bathhouse", "miyazaki"],
   // Add more movies as needed
 };
@@ -39,6 +40,18 @@ const Index = () => {
 
   const enhanceSearchQuery = (query: string): string => {
     const loweredQuery = query.toLowerCase();
+    
+    // Check if the query mentions Baymax or Big Hero 6 specifically
+    if (loweredQuery.includes('baymax') || loweredQuery.includes('big hero')) {
+      return "big hero 6";
+    }
+    
+    // Check if the query mentions The Godfather or mafia movie with Marlon Brando/Al Pacino
+    if (loweredQuery.includes('godfather') || 
+        (loweredQuery.includes('mafia') && 
+         (loweredQuery.includes('brando') || loweredQuery.includes('pacino') || loweredQuery.includes('coppola')))) {
+      return "the godfather";
+    }
     
     // Check if the query matches any of our predefined movie keywords
     for (const [movieTitle, keywords] of Object.entries(COMMON_MOVIE_KEYWORDS)) {
