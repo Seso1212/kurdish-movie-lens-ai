@@ -1,23 +1,7 @@
-
-/**
- * Service for interacting with the Deepseek AI via OpenRouter API
- */
-
-export interface DeepseekResponse {
-  title: string;
-  description: string;
-  searchTerms: string[];
-}
-
-/**
- * Processes a user's movie description through Deepseek AI and returns structured data
- * @param userQuery The user's natural language description of a movie
- * @returns Structured data with movie title, description and search terms
- */
 export async function processMovieDescription(userQuery: string): Promise<DeepseekResponse> {
   try {
     console.log(`Sending query to Deepseek: "${userQuery}"`);
-    
+
     const prompt = `
 You are a movie specialist AI. Based on this description: "${userQuery}", 
 identify the most likely movie being described. Output JSON ONLY with three fields:
@@ -28,34 +12,36 @@ identify the most likely movie being described. Output JSON ONLY with three fiel
 Format your response as valid JSON only, without any other text.
 `;
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch("https://llm.chutes.ai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": "Bearer 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",
+        "Authorization": "Bearer cpk_fa5c80c6a2ad4a78be9a7bb929847794.8c4e737f030455d285cdb91bed574c07.iHJmkNZ35PU5h3htiPEjnKOYJPTLnPwJ",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "deepseek/deepseek-prover-v2:free",
-        "messages": [
-          {"role": "user", "content": prompt}
-        ]
+        model: "deepseek-ai/DeepSeek-V3-0324",
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        stream: false,
+        max_tokens: 1024,
+        temperature: 0.7
       })
     });
 
     const result = await response.json();
-    console.log("Deepseek response:", result);
+    console.log("Chutes.ai response:", result);
 
     if (!result.choices || !result.choices[0]?.message?.content) {
-      throw new Error("Invalid response from Deepseek API");
+      throw new Error("Invalid response from Chutes.ai API");
     }
 
     const content = result.choices[0].message.content.trim();
-    // Try to parse the JSON response from the AI
+
     try {
-      // Handle cases where the AI might wrap the JSON in code blocks
       const jsonStr = content.replace(/```json|```/g, '').trim();
       const parsedResponse = JSON.parse(jsonStr);
-      
+
       return {
         title: parsedResponse.title || "Unknown",
         description: parsedResponse.description || "",
@@ -63,7 +49,6 @@ Format your response as valid JSON only, without any other text.
       };
     } catch (parseError) {
       console.error("Failed to parse JSON from AI response:", parseError);
-      // Fallback to returning the raw content as title
       return {
         title: content.substring(0, 50),
         description: "Could not extract structured data from AI response.",
@@ -71,7 +56,7 @@ Format your response as valid JSON only, without any other text.
       };
     }
   } catch (error) {
-    console.error("Error calling Deepseek API:", error);
+    console.error("Error calling Chutes.ai API:", error);
     throw new Error(`Failed to process movie description: ${error}`);
   }
 }
