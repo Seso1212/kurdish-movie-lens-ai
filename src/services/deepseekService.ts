@@ -1,3 +1,10 @@
+
+export interface DeepseekResponse {
+  title: string;
+  description: string;
+  searchTerms: string[];
+}
+
 export async function processMovieDescription(userQuery: string): Promise<DeepseekResponse> {
   try {
     console.log(`Sending query to Deepseek: "${userQuery}"`);
@@ -25,7 +32,7 @@ Format your response as valid JSON only, without any other text.
         ],
         stream: false,
         max_tokens: 1024,
-        temperature: 0.7
+        temperature: 1.0
       })
     });
 
